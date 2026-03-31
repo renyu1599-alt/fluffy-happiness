@@ -1,0 +1,2479 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>大屁桃走你</title>
+    <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        
+        html, body {
+            font-family: 'ZCOOL KuaiLe', 'Microsoft YaHei', cursive, sans-serif;
+            overflow: hidden;
+            background: #000;
+            touch-action: none;
+            overscroll-behavior: none;
+            -webkit-overflow-scrolling: auto;
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+        }
+        
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            display: none;
+            overflow: hidden;
+        }
+        
+        .screen.active {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* ==================== 封面 ==================== */
+        #coverScreen {
+            background: linear-gradient(180deg, #87CEEB 0%, #B8E6B8 40%, #90EE90 70%, #228B22 100%);
+            position: relative;
+        }
+        
+        .cover-sky {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(ellipse at 20% 20%, rgba(255,255,200,0.4) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 30%, rgba(255,220,255,0.3) 0%, transparent 40%);
+            pointer-events: none;
+        }
+        
+        .cloud {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 100px;
+            filter: blur(1px);
+        }
+        
+        .cloud::before, .cloud::after {
+            content: '';
+            position: absolute;
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 100px;
+        }
+        
+        .cloud1 { width: 120px; height: 50px; top: 8%; left: -10%; animation: drift1 25s linear infinite; }
+        .cloud1::before { width: 60px; height: 60px; top: -25px; left: 15px; }
+        .cloud1::after { width: 70px; height: 50px; top: -15px; right: 10px; }
+        
+        .cloud2 { width: 100px; height: 40px; top: 18%; left: -15%; animation: drift2 30s linear infinite; }
+        .cloud2::before { width: 50px; height: 50px; top: -20px; left: 10px; }
+        .cloud2::after { width: 60px; height: 40px; top: -10px; right: 8px; }
+        
+        .cloud3 { width: 140px; height: 55px; top: 12%; left: -20%; animation: drift3 35s linear infinite; }
+        .cloud3::before { width: 70px; height: 70px; top: -30px; left: 20px; }
+        .cloud3::after { width: 80px; height: 55px; top: -18px; right: 15px; }
+        
+        @keyframes drift1 { from { left: -20%; } to { left: 120%; } }
+        @keyframes drift2 { from { left: -25%; } to { left: 120%; } }
+        @keyframes drift3 { from { left: -30%; } to { left: 120%; } }
+        
+        .game-title {
+            position: absolute;
+            top: 5%;
+            font-size: clamp(60px, 10vw, 120px);
+            font-weight: 900;
+            color: #FF6B9D;
+            text-shadow: 
+                5px 5px 0 #fff,
+                -3px -3px 0 #fff,
+                8px 8px 0 #FFB6C1,
+                0 0 40px rgba(255, 107, 157, 0.9),
+                0 0 80px rgba(255, 182, 193, 0.6);
+            letter-spacing: 15px;
+            font-family: 'ZCOOL KuaiLe', cursive;
+            animation: titlePulse 2.5s ease-in-out infinite;
+            z-index: 100;
+            -webkit-text-stroke: 2px #fff;
+        }
+        
+        @keyframes titlePulse {
+            0%, 100% { transform: scale(1) rotate(-2deg); }
+            50% { transform: scale(1.08) rotate(2deg); }
+        }
+        
+        /* 封面屁桃 */
+        .cover-peach-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 400px;
+            height: 450px;
+            z-index: 50;
+            animation: coverHover 4s ease-in-out infinite;
+        }
+        
+        @keyframes coverHover {
+            0%, 100% { transform: translate(-50%, -50%) translateY(0) rotate(-12deg); }
+            50% { transform: translate(-50%, -50%) translateY(-25px) rotate(-8deg); }
+        }
+        
+        .cover-wing {
+            position: absolute;
+            width: 320px;
+            height: 220px;
+            top: 60px;
+            filter: drop-shadow(0 8px 15px rgba(0,0,0,0.25));
+            animation: wingFlap 0.6s ease-in-out infinite;
+        }
+        
+        .cover-wing.left {
+            right: 62%;
+            transform-origin: right center;
+        }
+        
+        .cover-wing.right {
+            left: 62%;
+            transform-origin: left center;
+            transform: scaleX(-1);
+            animation: wingFlapRight 0.6s ease-in-out infinite;
+        }
+        
+        @keyframes wingFlap {
+            0%, 100% { transform: rotate(-15deg) scaleY(1); }
+            50% { transform: rotate(15deg) scaleY(0.92); }
+        }
+        
+        @keyframes wingFlapRight {
+            0%, 100% { transform: scaleX(-1) rotate(-15deg) scaleY(1); }
+            50% { transform: scaleX(-1) rotate(15deg) scaleY(0.92); }
+        }
+        
+        .wing-shape {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(145deg, #FFB347 0%, #FF8C00 25%, #FF6347 55%, #FF4500 85%, #DC143C 100%);
+            border-radius: 0 100% 0 100%;
+            box-shadow: 
+                inset -8px -8px 30px rgba(0,0,0,0.25),
+                inset 8px 8px 30px rgba(255,255,255,0.25);
+            position: relative;
+        }
+        
+        .wing-feather {
+            position: absolute;
+            width: 75%;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, rgba(139,0,0,0.35), transparent);
+            left: 12%;
+            border-radius: 2px;
+        }
+        
+        .cover-peach-body {
+            position: absolute;
+            width: 280px;
+            height: 300px;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(145deg, #F4E4BC 0%, #F4C586 15%, #F4A460 35%, #FA8072 55%, #E9967A 75%, #CD5C5C 90%, #A0522D 100%);
+            border-radius: 48% 48% 52% 52% / 58% 58% 42% 42%;
+            box-shadow: 
+                inset -15px -15px 40px rgba(0,0,0,0.25),
+                inset 15px 15px 40px rgba(255,255,255,0.35),
+                0 15px 40px rgba(0,0,0,0.35),
+                0 0 60px rgba(205,92,92,0.25);
+            z-index: 10;
+        }
+        
+        .peach-crease {
+            position: absolute;
+            width: 5px;
+            height: 150px;
+            background: linear-gradient(180deg, rgba(139,69,19,0.45), rgba(160,82,45,0.15), transparent);
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 3px;
+            filter: blur(1px);
+        }
+        
+        .peach-face {
+            position: absolute;
+            top: 110px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 140px;
+            height: 80px;
+        }
+        
+        .eye {
+            position: absolute;
+            width: 18px;
+            height: 24px;
+            background: #2d1b1b;
+            border-radius: 50%;
+            top: 12px;
+            animation: blink 4s infinite;
+        }
+        
+        .eye.left { left: 20px; }
+        .eye.right { right: 20px; }
+        
+        .eye::after {
+            content: '';
+            position: absolute;
+            width: 6px;
+            height: 9px;
+            background: #fff;
+            border-radius: 50%;
+            top: 4px;
+            right: 3px;
+        }
+        
+        @keyframes blink {
+            0%, 45%, 55%, 100% { transform: scaleY(1); }
+            50% { transform: scaleY(0.1); }
+        }
+        
+        .blush {
+            position: absolute;
+            width: 35px;
+            height: 25px;
+            background: radial-gradient(ellipse, rgba(255,80,80,0.55), transparent 70%);
+            border-radius: 50%;
+            top: 32px;
+            filter: blur(2px);
+        }
+        
+        .blush.left { left: 8px; }
+        .blush.right { right: 8px; }
+        
+        .smile {
+            position: absolute;
+            width: 55px;
+            height: 28px;
+            border: 4px solid #2d1b1b;
+            border-top: none;
+            border-radius: 0 0 55px 55px;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .shy-line {
+            position: absolute;
+            width: 25px;
+            height: 2px;
+            background: rgba(255,80,80,0.4);
+            top: 38px;
+            border-radius: 1px;
+        }
+        
+        .shy-line.left { left: -5px; transform: rotate(15deg); }
+        .shy-line.right { right: -5px; transform: rotate(-15deg); }
+        
+        .forest-bg-cover {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 35%;
+            background: linear-gradient(180deg, #32CD32 0%, #228B22 30%, #006400 100%);
+            z-index: 20;
+        }
+        
+        .cover-tree {
+            position: absolute;
+            bottom: 100%;
+            width: 0;
+            height: 0;
+            border-left: 35px solid transparent;
+            border-right: 35px solid transparent;
+            border-bottom: 100px solid #2E8B57;
+            filter: drop-shadow(0 5px 5px rgba(0,0,0,0.2));
+        }
+        
+        .start-btn {
+            position: absolute;
+            bottom: 12%;
+            padding: 22px 65px;
+            font-size: 42px;
+            font-weight: bold;
+            color: #fff;
+            background: linear-gradient(145deg, #FF6B9D 0%, #FF1493 50%, #C71585 100%);
+            border: none;
+            border-radius: 60px;
+            cursor: pointer;
+            box-shadow: 
+                0 10px 0 #8B0A50,
+                0 18px 35px rgba(0,0,0,0.35),
+                inset 0 -5px 15px rgba(0,0,0,0.15),
+                inset 0 5px 15px rgba(255,255,255,0.25);
+            transition: all 0.15s;
+            z-index: 100;
+            font-family: 'ZCOOL KuaiLe', cursive;
+            animation: btnPulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes btnPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .start-btn:hover {
+            transform: translateY(-4px) scale(1.08);
+            box-shadow: 
+                0 14px 0 #8B0A50,
+                0 25px 45px rgba(0,0,0,0.4),
+                inset 0 -5px 15px rgba(0,0,0,0.15),
+                inset 0 5px 15px rgba(255,255,255,0.25);
+        }
+        
+        .start-btn:active {
+            transform: translateY(6px) scale(0.98);
+            box-shadow: 
+                0 4px 0 #8B0A50,
+                0 10px 25px rgba(0,0,0,0.35);
+        }
+        
+        /* ==================== 关卡选择 ==================== */
+        #levelScreen {
+            background: linear-gradient(180deg, #87CEEB 0%, #98FB98 60%, #228B22 100%);
+            position: relative;
+        }
+        
+        .level-forest-bg {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 25%;
+            background: linear-gradient(180deg, #228B22 0%, #006400 100%);
+            z-index: 1;
+        }
+        
+        .level-title {
+            font-size: clamp(40px, 6vw, 64px);
+            color: #2E8B57;
+            margin-bottom: 25px;
+            text-shadow: 3px 3px 6px rgba(255,255,255,0.8);
+            font-family: 'ZCOOL KuaiLe', cursive;
+            z-index: 10;
+        }
+        
+        .level-scroll {
+            max-height: 55vh;
+            overflow-y: auto;
+            z-index: 10;
+            padding: 12px;
+            background: rgba(255,255,255,0.25);
+            border-radius: 25px;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            touch-action: pan-y;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        @media (min-width: 768px) {
+            .level-scroll {
+                max-height: 60vh;
+                padding: 15px;
+            }
+        }
+        
+        .level-scroll::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        .level-scroll::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.3);
+            border-radius: 5px;
+        }
+        
+        .level-scroll::-webkit-scrollbar-thumb {
+            background: #FF69B4;
+            border-radius: 5px;
+        }
+        
+        .level-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            max-width: 850px;
+        }
+        
+        @media (min-width: 768px) {
+            .level-grid {
+                grid-template-columns: repeat(10, 1fr);
+                gap: 12px;
+            }
+        }
+        
+        .level-btn {
+            width: 55px;
+            height: 55px;
+            border: none;
+            border-radius: 14px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.25s;
+            background: linear-gradient(145deg, #90EE90 0%, #32CD32 100%);
+            color: #fff;
+            box-shadow: 0 5px 0 #228B22, 0 8px 15px rgba(0,0,0,0.2);
+            font-family: 'ZCOOL KuaiLe', cursive;
+        }
+        
+        @media (min-width: 768px) {
+            .level-btn {
+                width: 65px;
+                height: 65px;
+                border-radius: 16px;
+                font-size: 22px;
+            }
+        }
+        
+        .level-btn:hover:not(.locked) {
+            transform: translateY(-4px) scale(1.12) rotate(3deg);
+            box-shadow: 0 9px 0 #228B22, 0 14px 25px rgba(0,0,0,0.25);
+        }
+        
+        .level-btn.locked {
+            background: linear-gradient(145deg, #ccc 0%, #999 100%);
+            box-shadow: 0 5px 0 #666;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        
+        .level-btn.completed {
+            background: linear-gradient(145deg, #FFD700 0%, #FFA500 100%);
+            box-shadow: 0 5px 0 #FF8C00;
+            color: #8B4513;
+        }
+        
+        .level-btn.current {
+            animation: currentGlow 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes currentGlow {
+            0%, 100% { box-shadow: 0 5px 0 #228B22, 0 0 20px rgba(255,105,180,0.6); }
+            50% { box-shadow: 0 5px 0 #228B22, 0 0 35px rgba(255,105,180,0.9); }
+        }
+        
+        .back-btn {
+            margin-top: 25px;
+            padding: 14px 45px;
+            font-size: 26px;
+            border: none;
+            border-radius: 35px;
+            cursor: pointer;
+            background: linear-gradient(145deg, #FF6B6B 0%, #EE5A5A 100%);
+            color: #fff;
+            box-shadow: 0 6px 0 #CC5555, 0 10px 20px rgba(0,0,0,0.2);
+            transition: all 0.15s;
+            font-family: 'ZCOOL KuaiLe', cursive;
+            z-index: 10;
+        }
+        
+        .back-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 9px 0 #CC5555, 0 15px 28px rgba(0,0,0,0.25);
+        }
+        
+        /* ==================== 游戏界面 ==================== */
+        #gameScreen {
+            background: linear-gradient(180deg, #87CEEB 0%, #E0F6FF 40%, #98FB98 80%, #228B22 100%);
+            position: relative;
+        }
+        
+        #gameCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+        
+        .game-ui {
+            position: absolute;
+            top: 20px;
+            left: 25px;
+            z-index: 100;
+        }
+        
+        .score-display, .level-display, .combo-display {
+            font-size: 28px;
+            color: #2E8B57;
+            font-weight: bold;
+            text-shadow: 2px 2px 5px rgba(255,255,255,0.9);
+            margin-bottom: 8px;
+            font-family: 'ZCOOL KuaiLe', cursive;
+        }
+        
+        .combo-display {
+            color: #FF1493;
+            font-size: 32px;
+            animation: comboPulse 0.5s ease-out;
+        }
+        
+        @keyframes comboPulse {
+            0% { transform: scale(1.5); }
+            100% { transform: scale(1); }
+        }
+        
+        .rhythm-bar {
+            position: absolute;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            height: 12px;
+            background: rgba(255,255,255,0.4);
+            border-radius: 6px;
+            z-index: 100;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+        }
+        
+        .rhythm-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #FF69B4, #FF1493);
+            border-radius: 6px;
+            transition: width 0.1s linear;
+        }
+        
+        .game-controls {
+            position: absolute;
+            bottom: 45px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            display: flex;
+            gap: 15px;
+        }
+        
+        .control-btn {
+            padding: 14px 32px;
+            font-size: 22px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            background: rgba(255,255,255,0.92);
+            color: #2E8B57;
+            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transition: all 0.2s;
+            font-family: 'ZCOOL KuaiLe', cursive;
+            min-width: 100px;
+        }
+        
+        .control-btn:hover {
+            transform: scale(1.08);
+            background: #fff;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+        }
+        
+        .tutorial-hint {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 36px;
+            color: #FF1493;
+            text-shadow: 2px 2px 8px rgba(255,255,255,0.9);
+            z-index: 100;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-family: 'ZCOOL KuaiLe', cursive;
+            text-align: center;
+        }
+        
+        .tutorial-hint.show {
+            opacity: 1;
+        }
+        
+        /* ==================== 通关界面 ==================== */
+        #winScreen {
+            background: linear-gradient(180deg, #FFD700 0%, #FFA500 40%, #FF6347 80%, #FF1493 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .win-title {
+            font-size: clamp(56px, 8vw, 90px);
+            color: #fff;
+            text-shadow: 5px 5px 10px rgba(0,0,0,0.35);
+            margin-bottom: 20px;
+            animation: winPulse 1.2s ease-in-out infinite;
+            font-family: 'ZCOOL KuaiLe', cursive;
+            z-index: 10;
+        }
+        
+        @keyframes winPulse {
+            0%, 100% { transform: scale(1) rotate(-4deg); }
+            50% { transform: scale(1.12) rotate(4deg); }
+        }
+        
+        .win-subtitle {
+            font-size: clamp(28px, 4vw, 42px);
+            color: #fff;
+            margin-bottom: 15px;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+            font-family: 'ZCOOL KuaiLe', cursive;
+            z-index: 10;
+            text-align: center;
+        }
+        
+        .juice-animation {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
+        }
+        
+        .win-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 30px;
+            z-index: 10;
+            align-items: center;
+        }
+        
+        @media (min-width: 768px) {
+            .win-buttons {
+                flex-direction: row;
+                gap: 25px;
+                margin-top: 35px;
+            }
+        }
+        
+        .win-btn {
+            padding: 16px 36px;
+            font-size: 22px;
+            border: none;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            font-family: 'ZCOOL KuaiLe', cursive;
+        }
+        
+        @media (min-width: 768px) {
+            .win-btn {
+                padding: 18px 45px;
+                font-size: 26px;
+                border-radius: 45px;
+            }
+        }
+        
+        .next-level-btn {
+            background: linear-gradient(145deg, #90EE90 0%, #32CD32 100%);
+            color: #fff;
+        }
+        
+        .menu-btn {
+            background: linear-gradient(145deg, #87CEEB 0%, #4682B4 100%);
+            color: #fff;
+        }
+        
+        .win-btn:hover {
+            transform: translateY(-5px) scale(1.08);
+            box-shadow: 0 14px 35px rgba(0,0,0,0.4);
+        }
+        
+        /* 特效 */
+        .sound-popup {
+            position: absolute;
+            font-size: 52px;
+            color: #FF1493;
+            font-weight: bold;
+            pointer-events: none;
+            animation: soundPopup 0.8s ease-out forwards;
+            font-family: 'ZCOOL KuaiLe', cursive;
+            text-shadow: 2px 2px 8px rgba(255,255,255,0.9);
+            z-index: 200;
+        }
+        
+        @keyframes soundPopup {
+            0% { transform: translate(-50%, -50%) scale(0) rotate(-20deg); opacity: 1; }
+            30% { transform: translate(-50%, -80%) scale(1.4) rotate(10deg); opacity: 1; }
+            100% { transform: translate(-50%, -150%) scale(1) rotate(0deg); opacity: 0; }
+        }
+        
+        .particle {
+            position: absolute;
+            pointer-events: none;
+            border-radius: 50%;
+        }
+        
+        .heart-particle {
+            position: absolute;
+            color: #FF69B4;
+            font-size: 28px;
+            pointer-events: none;
+            animation: heartFloatUp 2.5s ease-out forwards;
+        }
+        
+        @keyframes heartFloatUp {
+            0% { transform: translateY(0) scale(0.5) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-200px) scale(1.2) rotate(20deg); opacity: 0; }
+        }
+        
+        .sparkle-particle {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background: radial-gradient(circle, #FFD700 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: sparkleAnim 1.5s ease-out forwards;
+        }
+        
+        @keyframes sparkleAnim {
+            0% { transform: scale(0) rotate(0deg); opacity: 0; }
+            50% { transform: scale(1.2) rotate(180deg); opacity: 1; }
+            100% { transform: scale(0) rotate(360deg); opacity: 0; }
+        }
+        
+        @keyframes juiceFall {
+            0% { transform: translateY(0) scale(1) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(110vh) scale(0.4) rotate(360deg); opacity: 0; }
+        }
+        
+        @keyframes starPop {
+            0% { transform: scale(0) rotate(0deg); opacity: 0; }
+            50% { transform: scale(1.4) rotate(180deg); opacity: 1; }
+            100% { transform: scale(1) rotate(360deg); opacity: 1; }
+        }
+        
+        .perfect-text {
+            position: absolute;
+            font-size: 48px;
+            color: #FFD700;
+            font-weight: bold;
+            pointer-events: none;
+            animation: perfectPop 1s ease-out forwards;
+            font-family: 'ZCOOL KuaiLe', cursive;
+            text-shadow: 3px 3px 8px rgba(255,105,180,0.8);
+            z-index: 150;
+        }
+        
+        @keyframes perfectPop {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+            40% { transform: translate(-50%, -120%) scale(1.3) rotate(-5deg); opacity: 1; }
+            100% { transform: translate(-50%, -180%) scale(1) rotate(5deg); opacity: 0; }
+        }
+        
+        /* 登录界面 */
+        #loginScreen {
+            background: linear-gradient(180deg, #FFD1DC 0%, #FFB6C1 50%, #FF69B4 100%);
+            position: relative;
+        }
+        
+        .login-box {
+            background: rgba(255,255,255,0.92);
+            padding: 40px 30px;
+            border-radius: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            text-align: center;
+            z-index: 10;
+            max-width: 450px;
+            width: 90%;
+        }
+        
+        @media (min-width: 768px) {
+            .login-box {
+                padding: 50px 60px;
+            }
+        }
+        
+        .login-title {
+            font-size: 42px;
+            color: #FF1493;
+            margin-bottom: 10px;
+            font-family: 'ZCOOL KuaiLe', cursive;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .login-subtitle {
+            font-size: 20px;
+            color: #888;
+            margin-bottom: 30px;
+        }
+        
+        .login-input {
+            width: 100%;
+            padding: 18px 25px;
+            font-size: 24px;
+            border: 3px solid #FFB6C1;
+            border-radius: 30px;
+            outline: none;
+            text-align: center;
+            font-family: 'ZCOOL KuaiLe', cursive;
+            color: #FF1493;
+            margin-bottom: 25px;
+            transition: all 0.3s;
+        }
+        
+        .login-input:focus {
+            border-color: #FF1493;
+            box-shadow: 0 0 20px rgba(255,105,180,0.3);
+        }
+        
+        .login-btn {
+            width: 100%;
+            padding: 16px;
+            font-size: 26px;
+            border: none;
+            border-radius: 30px;
+            background: linear-gradient(145deg, #FF6B9D 0%, #FF1493 100%);
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: 'ZCOOL KuaiLe', cursive;
+            box-shadow: 0 6px 0 #C71585, 0 10px 25px rgba(0,0,0,0.2);
+            transition: all 0.15s;
+        }
+        
+        .login-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 9px 0 #C71585, 0 15px 35px rgba(0,0,0,0.25);
+        }
+        
+        .login-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #C71585, 0 6px 15px rgba(0,0,0,0.2);
+        }
+        
+        /* 排行榜 */
+        .leaderboard-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 10px 18px;
+            font-size: 16px;
+            border: none;
+            border-radius: 25px;
+            background: linear-gradient(145deg, #FFD700 0%, #FFA500 100%);
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: 'ZCOOL KuaiLe', cursive;
+            box-shadow: 0 4px 0 #FF8C00, 0 6px 15px rgba(0,0,0,0.2);
+            z-index: 100;
+            transition: all 0.15s;
+        }
+        
+        @media (min-width: 768px) {
+            .leaderboard-btn {
+                top: 20px;
+                right: 20px;
+                padding: 12px 25px;
+                font-size: 20px;
+            }
+        }
+        
+        .leaderboard-btn:hover {
+            transform: translateY(-2px) scale(1.05);
+        }
+        
+        .leaderboard-modal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+        }
+        
+        .leaderboard-modal.show {
+            display: flex;
+        }
+        
+        .leaderboard-content {
+            background: rgba(255,255,255,0.95);
+            padding: 25px 20px;
+            border-radius: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 70vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            touch-action: pan-y;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        @media (min-width: 768px) {
+            .leaderboard-content {
+                padding: 35px 45px;
+            }
+        }
+        
+        .leaderboard-title {
+            font-size: 32px;
+            color: #FF1493;
+            text-align: center;
+            margin-bottom: 20px;
+            font-family: 'ZCOOL KuaiLe', cursive;
+        }
+        
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 18px;
+            margin-bottom: 10px;
+            border-radius: 15px;
+            font-size: 20px;
+            font-family: 'ZCOOL KuaiLe', cursive;
+        }
+        
+        .leaderboard-item.rank1 { background: linear-gradient(90deg, #FFD700 0%, #FFA500 100%); color: #fff; }
+        .leaderboard-item.rank2 { background: linear-gradient(90deg, #C0C0C0 0%, #A9A9A9 100%); color: #fff; }
+        .leaderboard-item.rank3 { background: linear-gradient(90deg, #CD7F32 0%, #B87333 100%); color: #fff; }
+        .leaderboard-item.other { background: rgba(255,182,193,0.3); color: #555; }
+        
+        .close-modal-btn {
+            width: 100%;
+            margin-top: 20px;
+            padding: 12px;
+            font-size: 22px;
+            border: none;
+            border-radius: 25px;
+            background: #FF6B9D;
+            color: #fff;
+            font-family: 'ZCOOL KuaiLe', cursive;
+            cursor: pointer;
+        }
+        
+        .player-name-display {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 16px;
+            color: #FF1493;
+            background: rgba(255,255,255,0.8);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-family: 'ZCOOL KuaiLe', cursive;
+            z-index: 100;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        @media (min-width: 768px) {
+            .player-name-display {
+                top: 20px;
+                right: 20px;
+                font-size: 22px;
+                padding: 8px 20px;
+                max-width: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 登录界面 -->
+    <div id="loginScreen" class="screen active">
+        <div class="login-box">
+            <div style="font-size: 64px; margin-bottom: 10px;">🍑</div>
+            <h2 class="login-title">大屁桃走你</h2>
+            <p class="login-subtitle">请输入你的名字开始冒险</p>
+            <input type="text" class="login-input" id="playerNameInput" placeholder="你的名字" maxlength="10" autocomplete="off">
+            <button class="login-btn" onclick="doLogin()">开始游戏</button>
+        </div>
+    </div>
+    
+    <!-- 封面 -->
+    <div id="coverScreen" class="screen">
+        <div class="player-name-display" id="coverPlayerName"></div>
+        <button class="leaderboard-btn" onclick="showLeaderboard()">🏆 排行榜</button>
+        <div class="cover-sky"></div>
+        <div class="cloud cloud1"></div>
+        <div class="cloud cloud2"></div>
+        <div class="cloud cloud3"></div>
+        
+        <h1 class="game-title">🍑 大屁桃走你 🍑</h1>
+        
+        <div class="cover-peach-container">
+            <div class="cover-wing left">
+                <div class="wing-shape">
+                    <div class="wing-feather" style="top: 25%;"></div>
+                    <div class="wing-feather" style="top: 45%;"></div>
+                    <div class="wing-feather" style="top: 65%;"></div>
+                    <div class="wing-feather" style="top: 82%;"></div>
+                </div>
+            </div>
+            <div class="cover-wing right">
+                <div class="wing-shape">
+                    <div class="wing-feather" style="top: 25%;"></div>
+                    <div class="wing-feather" style="top: 45%;"></div>
+                    <div class="wing-feather" style="top: 65%;"></div>
+                    <div class="wing-feather" style="top: 82%;"></div>
+                </div>
+            </div>
+            <div class="cover-peach-body">
+                <div class="peach-crease"></div>
+                <div class="peach-face">
+                    <div class="eye left"></div>
+                    <div class="eye right"></div>
+                    <div class="blush left"></div>
+                    <div class="blush right"></div>
+                    <div class="shy-line left"></div>
+                    <div class="shy-line right"></div>
+                    <div class="smile"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="forest-bg-cover" id="coverForest"></div>
+        
+        <button class="start-btn" onclick="showLevelSelect()">开始冒险</button>
+        
+        <div id="coverEffects" style="position:absolute;width:100%;height:100%;pointer-events:none;z-index:80;"></div>
+    </div>
+    
+    <!-- 关卡选择 -->
+    <div id="levelScreen" class="screen">
+        <div class="player-name-display" id="levelPlayerName"></div>
+        <button class="leaderboard-btn" onclick="showLeaderboard()">🏆 排行榜</button>
+        <div class="level-forest-bg"></div>
+        <h2 class="level-title">🌲 选择关卡 🌲</h2>
+        <div class="level-scroll">
+            <div class="level-grid" id="levelGrid"></div>
+        </div>
+        <button class="back-btn" onclick="showCover()">返回封面</button>
+        <div id="levelEffects" style="position:absolute;width:100%;height:100%;pointer-events:none;z-index:5;"></div>
+    </div>
+    
+    <!-- 游戏界面 -->
+    <div id="gameScreen" class="screen">
+        <canvas id="gameCanvas"></canvas>
+        <div class="game-ui">
+            <div class="score-display">得分: <span id="score">0</span></div>
+            <div class="level-display">关卡: <span id="currentLevel">1</span>/100</div>
+            <div class="combo-display" id="comboDisplay" style="display:none;">连击 x<span id="combo">0</span></div>
+        </div>
+        <div class="tutorial-hint" id="tutorialHint">
+            按空格键或点击屏幕<br>跟着节奏飞!
+        </div>
+        <div class="rhythm-bar">
+            <div class="rhythm-fill" id="rhythmFill" style="width: 0%;"></div>
+        </div>
+        <div class="game-controls">
+            <button class="control-btn" onclick="togglePause()">⏸ 暂停</button>
+            <button class="control-btn" onclick="backToLevels()">🏠 返回</button>
+        </div>
+        <div id="gameEffects" style="position:absolute;width:100%;height:100%;pointer-events:none;z-index:150;"></div>
+    </div>
+    
+    <!-- 通关界面 -->
+    <div id="winScreen" class="screen">
+        <div class="player-name-display" id="winPlayerName"></div>
+        <button class="leaderboard-btn" onclick="showLeaderboard()">🏆 排行榜</button>
+        <div class="juice-animation" id="juiceAnim"></div>
+        <h2 class="win-title">🎉 恭喜通关! 🎉</h2>
+        <div class="win-subtitle">
+            大屁桃榨成了甜蜜果汁!<br>
+            <span style="font-size: 0.7em;">得分: <span id="winScore">0</span></span>
+        </div>
+        <div class="win-buttons">
+            <button class="win-btn next-level-btn" onclick="nextLevel()">下一关 ➡</button>
+            <button class="win-btn menu-btn" onclick="showLevelSelect()">关卡选择</button>
+        </div>
+        <div id="winEffects" style="position:absolute;width:100%;height:100%;pointer-events:none;z-index:5;"></div>
+    </div>
+    
+    <!-- 排行榜弹窗 -->
+    <div class="leaderboard-modal" id="leaderboardModal" onclick="hideLeaderboard(event)">
+        <div class="leaderboard-content" onclick="event.stopPropagation()">
+            <h3 class="leaderboard-title">🏆 甜蜜排行榜 🏆</h3>
+            <div id="leaderboardList"></div>
+            <button class="close-modal-btn" onclick="hideLeaderboard()">关闭</button>
+        </div>
+    </div>
+
+    <script>
+
+        // ==================== 游戏状态 ====================
+        let currentLevel = 1;
+        let unlockedLevel = parseInt(localStorage.getItem('peachUnlocked')) || 1;
+        let gameRunning = false;
+        let gamePaused = false;
+        let score = 0;
+        let combo = 0;
+        let animationId;
+        let canvas, ctx;
+        let playerName = localStorage.getItem('peachPlayerName') || '';
+        
+        // ==================== 登录系统 ====================
+        function checkLogin() {
+            if (!playerName) {
+                hideAllScreens();
+                document.getElementById('loginScreen').classList.add('active');
+                return false;
+            }
+            updatePlayerNameDisplays();
+            return true;
+        }
+        
+        function doLogin() {
+            const input = document.getElementById('playerNameInput');
+            const name = input.value.trim();
+            if (!name) {
+                input.style.borderColor = '#ff0000';
+                setTimeout(() => input.style.borderColor = '#FFB6C1', 500);
+                return;
+            }
+            playerName = name;
+            localStorage.setItem('peachPlayerName', playerName);
+            input.value = '';
+            updatePlayerNameDisplays();
+            showCover();
+        }
+        
+        function updatePlayerNameDisplays() {
+            document.getElementById('coverPlayerName').textContent = '👤 ' + playerName;
+            document.getElementById('levelPlayerName').textContent = '👤 ' + playerName;
+            document.getElementById('winPlayerName').textContent = '👤 ' + playerName;
+        }
+        
+        // ==================== 排行榜系统 ====================
+        function saveScore(level, scoreValue) {
+            if (!playerName) return;
+            let leaderboard = JSON.parse(localStorage.getItem('peachLeaderboard')) || [];
+            leaderboard.push({
+                name: playerName,
+                level: level,
+                score: scoreValue,
+                date: new Date().toLocaleString('zh-CN')
+            });
+            // 按分数降序，同分按关卡降序
+            leaderboard.sort((a, b) => {
+                if (b.score !== a.score) return b.score - a.score;
+                return b.level - a.level;
+            });
+            // 只保留前50条
+            leaderboard = leaderboard.slice(0, 50);
+            localStorage.setItem('peachLeaderboard', JSON.stringify(leaderboard));
+        }
+        
+        function showLeaderboard() {
+            const modal = document.getElementById('leaderboardModal');
+            const list = document.getElementById('leaderboardList');
+            const leaderboard = JSON.parse(localStorage.getItem('peachLeaderboard')) || [];
+            
+            if (leaderboard.length === 0) {
+                list.innerHTML = '<div style="text-align:center;color:#888;padding:20px;">还没有记录哦~<br>快来玩一局吧!</div>';
+            } else {
+                list.innerHTML = leaderboard.slice(0, 10).map((item, index) => {
+                    const rankClass = index === 0 ? 'rank1' : index === 1 ? 'rank2' : index === 2 ? 'rank3' : 'other';
+                    const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
+                    return `
+                        <div class="leaderboard-item ${rankClass}">
+                            <span>${medal} ${item.name}</span>
+                            <span>关卡${item.level} · ${item.score}分</span>
+                        </div>
+                    `;
+                }).join('');
+            }
+            
+            modal.classList.add('show');
+        }
+        
+        function hideLeaderboard(e) {
+            if (e && e.target !== e.currentTarget) return;
+            document.getElementById('leaderboardModal').classList.remove('show');
+        }
+        
+        // ==================== Web Audio API 音效系统 ====================
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+        let bgmOscillators = [];
+        let bgmGain = null;
+        
+        function initAudio() {
+            if (!audioCtx) audioCtx = new AudioContext();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+        }
+        
+        // 合成小孩笑声
+        function playChildLaugh() {
+            if (!audioCtx) initAudio();
+            const t = audioCtx.currentTime;
+            
+            // 主音高 - 快速滑音模拟笑声
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            const filter = audioCtx.createBiquadFilter();
+            
+            osc.type = 'sine';
+            filter.type = 'lowpass';
+            filter.frequency.value = 2500;
+            
+            // 笑声音高模式: 快速上下滑动
+            osc.frequency.setValueAtTime(600, t);
+            osc.frequency.exponentialRampToValueAtTime(800, t + 0.05);
+            osc.frequency.exponentialRampToValueAtTime(500, t + 0.12);
+            osc.frequency.exponentialRampToValueAtTime(700, t + 0.18);
+            osc.frequency.exponentialRampToValueAtTime(550, t + 0.25);
+            
+            gain.gain.setValueAtTime(0, t);
+            gain.gain.linearRampToValueAtTime(0.25, t + 0.03);
+            gain.gain.exponentialRampToValueAtTime(0.15, t + 0.15);
+            gain.gain.exponentialRampToValueAtTime(0.01, t + 0.35);
+            
+            osc.connect(filter);
+            filter.connect(gain);
+            gain.connect(audioCtx.destination);
+            
+            osc.start(t);
+            osc.stop(t + 0.4);
+            
+            // 谐波层让声音更"甜"
+            const osc2 = audioCtx.createOscillator();
+            const gain2 = audioCtx.createGain();
+            osc2.type = 'triangle';
+            osc2.frequency.setValueAtTime(1200, t);
+            gain2.gain.setValueAtTime(0, t);
+            gain2.gain.linearRampToValueAtTime(0.08, t + 0.02);
+            gain2.gain.exponentialRampToValueAtTime(0.01, t + 0.25);
+            
+            osc2.connect(gain2);
+            gain2.connect(audioCtx.destination);
+            osc2.start(t);
+            osc2.stop(t + 0.3);
+        }
+        
+        // 合成"夯!"声
+        function playHangSound() {
+            if (!audioCtx) initAudio();
+            const t = audioCtx.currentTime;
+            
+            // 低频冲击
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(80, t);
+            osc.frequency.exponentialRampToValueAtTime(30, t + 0.4);
+            
+            gain.gain.setValueAtTime(0, t);
+            gain.gain.linearRampToValueAtTime(0.5, t + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.01, t + 0.6);
+            
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(600, t);
+            filter.frequency.exponentialRampToValueAtTime(100, t + 0.5);
+            
+            osc.connect(filter);
+            filter.connect(gain);
+            gain.connect(audioCtx.destination);
+            
+            osc.start(t);
+            osc.stop(t + 0.7);
+            
+            // 鼓声层
+            const noise = audioCtx.createBufferSource();
+            const buffer = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.3, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < data.length; i++) {
+                data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / data.length, 3);
+            }
+            noise.buffer = buffer;
+            const noiseGain = audioCtx.createGain();
+            noiseGain.gain.setValueAtTime(0.4, t);
+            noiseGain.gain.exponentialRampToValueAtTime(0.01, t + 0.25);
+            const noiseFilter = audioCtx.createBiquadFilter();
+            noiseFilter.type = 'lowpass';
+            noiseFilter.frequency.value = 400;
+            noise.connect(noiseFilter);
+            noiseFilter.connect(noiseGain);
+            noiseGain.connect(audioCtx.destination);
+            noise.start(t);
+        }
+        
+        // 背景音乐 - 轻快的森林小调
+        // ==================== 关卡音乐生成器 ====================
+        function getLevelMusic(level) {
+            // 根音基于关卡，C大调附近循环
+            const rootIndex = (level - 1) % 12;
+            const baseFreq = 261.63 * Math.pow(2, rootIndex / 12);
+            
+            // 四种音阶循环
+            const scales = [
+                [0, 2, 4, 5, 7, 9, 11, 12, 14, 16], // 大调
+                [0, 2, 3, 5, 7, 8, 10, 12, 14, 15], // 小调
+                [0, 2, 4, 7, 9, 12, 14, 16, 19, 21], // 五声音阶
+                [0, 2, 3, 5, 7, 9, 10, 12, 14, 15]  // 多利亚
+            ];
+            const scaleType = Math.floor((level - 1) / 12) % 4;
+            const scale = scales[scaleType];
+            
+            // 节奏型：每关不同速度
+            const tempo = 0.35 + (level % 5) * 0.04; // 0.35 ~ 0.51
+            const patterns = [
+                [1, 0.5, 0.5, 1, 0.5, 0.5],
+                [0.5, 0.5, 1, 1, 0.5, 0.5],
+                [1, 1, 0.5, 0.5, 1, 0.5],
+                [0.75, 0.25, 1, 0.5, 0.5, 1],
+                [1, 0.5, 1, 0.5, 1]
+            ];
+            const pattern = patterns[level % patterns.length];
+            
+            // 伪随机旋律种子
+            const seed = level * 9301 + 49297;
+            const rand = (i) => {
+                const x = Math.sin(seed + i) * 10000;
+                return x - Math.floor(x);
+            };
+            
+            // 生成8小节的旋律
+            const melody = [];
+            for (let bar = 0; bar < 8; bar++) {
+                let beatInBar = 0;
+                let noteIdx = 0;
+                while (beatInBar < 4 && noteIdx < pattern.length) {
+                    const dur = pattern[noteIdx] * tempo;
+                    if (beatInBar + pattern[noteIdx] > 4) break;
+                    
+                    const r = rand(bar * 10 + noteIdx);
+                    const scaleDegree = Math.floor(r * scale.length);
+                    const octave = r > 0.7 ? 1 : (r < 0.3 ? -1 : 0);
+                    const freq = baseFreq * Math.pow(2, (scale[scaleDegree] + octave * 12) / 12);
+                    
+                    melody.push({
+                        freq: freq,
+                        duration: dur,
+                        chord: noteIdx % 2 === 0
+                    });
+                    
+                    beatInBar += pattern[noteIdx];
+                    noteIdx++;
+                }
+                // 补满小节
+                if (beatInBar < 4) {
+                    melody.push({
+                        freq: baseFreq,
+                        duration: (4 - beatInBar) * tempo,
+                        chord: true
+                    });
+                }
+            }
+            
+            return { melody, tempo, baseFreq };
+        }
+        
+        function startBGM() {
+            if (!audioCtx) initAudio();
+            stopBGM();
+            
+            bgmGain = audioCtx.createGain();
+            bgmGain.gain.value = 0.07;
+            bgmGain.connect(audioCtx.destination);
+            
+            const music = getLevelMusic(currentLevel);
+            const melody = music.melody;
+            
+            function playMeasure(startTime) {
+                let t = startTime;
+                for (let i = 0; i < melody.length; i++) {
+                    const note = melody[i];
+                    const dur = note.duration;
+                    
+                    // 主旋律
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.value = note.freq;
+                    
+                    gain.gain.setValueAtTime(0, t);
+                    gain.gain.linearRampToValueAtTime(0.14, t + 0.03);
+                    gain.gain.exponentialRampToValueAtTime(0.01, t + dur * 0.85);
+                    
+                    osc.connect(gain);
+                    gain.connect(bgmGain);
+                    osc.start(t);
+                    osc.stop(t + dur);
+                    bgmOscillators.push(osc);
+                    
+                    // 和弦伴奏
+                    if (note.chord) {
+                        const chord1 = audioCtx.createOscillator();
+                        const chordGain1 = audioCtx.createGain();
+                        chord1.type = 'sine';
+                        chord1.frequency.value = note.freq * 0.5;
+                        chordGain1.gain.setValueAtTime(0, t);
+                        chordGain1.gain.linearRampToValueAtTime(0.08, t + 0.05);
+                        chordGain1.gain.exponentialRampToValueAtTime(0.01, t + dur * 1.2);
+                        chord1.connect(chordGain1);
+                        chordGain1.connect(bgmGain);
+                        chord1.start(t);
+                        chord1.stop(t + dur * 1.5);
+                        bgmOscillators.push(chord1);
+                        
+                        // 三度音
+                        const chord2 = audioCtx.createOscillator();
+                        const chordGain2 = audioCtx.createGain();
+                        chord2.type = 'sine';
+                        chord2.frequency.value = note.freq * 0.63; // 约五度下方
+                        chordGain2.gain.value = 0.05;
+                        chord2.connect(chordGain2);
+                        chordGain2.connect(bgmGain);
+                        chord2.start(t);
+                        chord2.stop(t + dur * 1.2);
+                        bgmOscillators.push(chord2);
+                    }
+                    
+                    t += dur;
+                }
+                
+                // 循环
+                const totalDuration = melody.reduce((a, b) => a + b.duration, 0);
+                const nextOsc = audioCtx.createOscillator();
+                nextOsc.frequency.value = 0;
+                const nextGain = audioCtx.createGain();
+                nextGain.gain.value = 0;
+                nextOsc.connect(nextGain);
+                nextGain.connect(bgmGain);
+                nextOsc.start(t);
+                nextOsc.stop(t + 0.01);
+                nextOsc.onended = () => {
+                    if (gameRunning && !gamePaused) {
+                        playMeasure(audioCtx.currentTime);
+                    }
+                };
+                bgmOscillators.push(nextOsc);
+            }
+            
+            playMeasure(audioCtx.currentTime);
+        }
+        
+        function stopBGM() {
+            bgmOscillators.forEach(osc => {
+                try { osc.stop(); } catch(e) {}
+            });
+            bgmOscillators = [];
+        }
+        
+        // 节奏提示音
+        function playBeatSound() {
+            if (!audioCtx) initAudio();
+            const t = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.value = 880;
+            gain.gain.setValueAtTime(0.05, t);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(t);
+            osc.stop(t + 0.05);
+        }
+        
+        // ==================== 游戏对象 ====================
+        let peach = {
+            x: 150, y: 0, vy: 0, width: 55, height: 70,
+            angle: 0, targetY: 0, flapPhase: 0,
+            dashX: 0, isDashing: false
+        };
+        let gaps = [];
+        let particles = [];
+        let bgTrees = [];
+        let rhythmBeats = [];
+        let lastBeatTime = 0;
+        let beatInterval = 1000;
+        let nextGapIndex = 0;
+        let gapPassed = 0;
+        let totalGaps = 0;
+        let gameStartTime = 0;
+        let levelConfig = {};
+        
+        // ==================== 初始化 ====================
+        function initCoverForest() {
+            const forest = document.getElementById('coverForest');
+            for (let i = 0; i < 20; i++) {
+                const tree = document.createElement('div');
+                tree.className = 'cover-tree';
+                tree.style.left = `${i * 6 + Math.random() * 4}%`;
+                const h = 80 + Math.random() * 70;
+                const w = 25 + Math.random() * 20;
+                tree.style.borderBottomWidth = `${h}px`;
+                tree.style.borderLeftWidth = `${w}px`;
+                tree.style.borderRightWidth = `${w}px`;
+                tree.style.opacity = 0.5 + Math.random() * 0.5;
+                tree.style.borderBottomColor = `rgb(${30 + Math.random() * 30}, ${120 + Math.random() * 40}, ${50 + Math.random() * 30})`;
+                forest.appendChild(tree);
+            }
+        }
+        
+        function initLevelSelect() {
+            const grid = document.getElementById('levelGrid');
+            grid.innerHTML = '';
+            for (let i = 1; i <= 100; i++) {
+                const btn = document.createElement('button');
+                btn.className = 'level-btn';
+                btn.textContent = i;
+                if (i > unlockedLevel) {
+                    btn.classList.add('locked');
+                    btn.disabled = true;
+                    btn.innerHTML = '🔒';
+                } else if (i < unlockedLevel) {
+                    btn.classList.add('completed');
+                    btn.innerHTML = '✓';
+                }
+                if (i === currentLevel && i <= unlockedLevel) {
+                    btn.classList.add('current');
+                }
+                btn.onclick = () => { initAudio(); startGame(i); };
+                grid.appendChild(btn);
+            }
+        }
+        
+        function showCover() {
+            if (!checkLogin()) return;
+            hideAllScreens();
+            document.getElementById('coverScreen').classList.add('active');
+            stopGame();
+            startCoverEffects();
+        }
+        
+        function showLevelSelect() {
+            hideAllScreens();
+            document.getElementById('levelScreen').classList.add('active');
+            initLevelSelect();
+            stopGame();
+            startLevelEffects();
+        }
+        
+        function hideAllScreens() {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        }
+        
+        function startGame(level) {
+            currentLevel = level;
+            hideAllScreens();
+            document.getElementById('gameScreen').classList.add('active');
+            document.getElementById('currentLevel').textContent = level;
+            initGame();
+        }
+        
+        // ==================== 关卡配置 ====================
+        function getLevelConfig(level) {
+            return {
+                speed: Math.min(2.2 + level * 0.075, 5),
+                gapCount: Math.min(6 + Math.floor(level / 8), 18),
+                gapHeight: Math.max(150 - level * 0.6, 100),
+                minSpacing: Math.max(320 - level * 0.75, 240),
+                maxSpacing: Math.max(420 - level * 0.75, 300),
+                beatInterval: Math.max(700 - level * 2, 450),
+                treeWidth: Math.min(40 + level * 0.15, 55),
+                rhythmTolerance: Math.max(200 - level * 0.5, 150)
+            };
+        }
+        
+        // ==================== 游戏初始化 ====================
+        function initGame() {
+            canvas = document.getElementById('gameCanvas');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            ctx = canvas.getContext('2d');
+            
+            levelConfig = getLevelConfig(currentLevel);
+            beatInterval = levelConfig.beatInterval;
+            
+            peach = {
+                x: canvas.width * 0.15,
+                y: canvas.height / 2,
+                vy: 0,
+                width: 50,
+                height: 65,
+                angle: 0,
+                targetY: canvas.height / 2,
+                flapPhase: 0,
+                dashX: 0,
+                isDashing: false
+            };
+            
+            score = 0;
+            combo = 0;
+            gapPassed = 0;
+            nextGapIndex = 0;
+            particles = [];
+            bgTrees = [];
+            rhythmBeats = [];
+            
+            // 生成背景树
+            for (let i = 0; i < 15; i++) {
+                bgTrees.push({
+                    x: Math.random() * canvas.width,
+                    y: canvas.height - 40 - Math.random() * 30,
+                    width: 30 + Math.random() * 40,
+                    height: 60 + Math.random() * 80,
+                    color: `hsl(${100 + Math.random() * 40}, ${50 + Math.random() * 30}%, ${25 + Math.random() * 20}%)`
+                });
+            }
+            
+            // 生成间隙和节奏点
+            gaps = [];
+            let x = canvas.width + 200;
+            totalGaps = levelConfig.gapCount;
+            
+            for (let i = 0; i < totalGaps; i++) {
+                const spacing = levelConfig.minSpacing + Math.random() * (levelConfig.maxSpacing - levelConfig.minSpacing);
+                const gapY = 80 + Math.random() * (canvas.height - levelConfig.gapHeight - 160);
+                
+                gaps.push({
+                    x: x,
+                    y: gapY,
+                    height: levelConfig.gapHeight,
+                    width: levelConfig.treeWidth,
+                    passed: false,
+                    hit: false
+                });
+                
+                x += spacing;
+            }
+            
+            gameRunning = true;
+            gamePaused = false;
+            gameStartTime = performance.now();
+            lastBeatTime = gameStartTime;
+            
+            document.getElementById('score').textContent = '0';
+            document.getElementById('comboDisplay').style.display = 'none';
+            
+            // 显示教程提示
+            const hint = document.getElementById('tutorialHint');
+            hint.classList.add('show');
+            setTimeout(() => hint.classList.remove('show'), 3000);
+            
+            startBGM();
+            gameLoop();
+        }
+        
+        // ==================== 游戏主循环 ====================
+        function gameLoop() {
+            if (!gameRunning) return;
+            if (gamePaused) {
+                animationId = requestAnimationFrame(gameLoop);
+                return;
+            }
+            
+            const now = performance.now();
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            drawBackground(now);
+            updateRhythm(now);
+            drawRhythmBeats();
+            updatePeach();
+            drawPeach();
+            updateGaps();
+            drawGaps();
+            updateParticles();
+            drawParticles();
+            checkCollision();
+            checkGapPass();
+            
+            // 更新UI
+            const nextGap = gaps[nextGapIndex];
+            if (nextGap) {
+                const dist = nextGap.x - peach.x;
+                const maxDist = canvas.width * 0.6;
+                const progress = Math.max(0, Math.min(1, 1 - dist / maxDist));
+                document.getElementById('rhythmFill').style.width = `${progress * 100}%`;
+            } else {
+                document.getElementById('rhythmFill').style.width = '100%';
+            }
+            
+            if (gapPassed >= totalGaps && gaps.length > 0) {
+                levelComplete();
+                return;
+            }
+            
+            animationId = requestAnimationFrame(gameLoop);
+        }
+        
+        // ==================== 绘制背景 ====================
+        function drawBackground(now) {
+            // 天空渐变
+            const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            grad.addColorStop(0, '#87CEEB');
+            grad.addColorStop(0.4, '#E0F6FF');
+            grad.addColorStop(0.8, '#98FB98');
+            grad.addColorStop(1, '#228B22');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // 阳光
+            const sunGrad = ctx.createRadialGradient(canvas.width * 0.85, canvas.height * 0.12, 0, canvas.width * 0.85, canvas.height * 0.12, 120);
+            sunGrad.addColorStop(0, 'rgba(255, 255, 200, 0.6)');
+            sunGrad.addColorStop(0.5, 'rgba(255, 220, 150, 0.3)');
+            sunGrad.addColorStop(1, 'transparent');
+            ctx.fillStyle = sunGrad;
+            ctx.beginPath();
+            ctx.arc(canvas.width * 0.85, canvas.height * 0.12, 120, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 远景树（缓慢移动）
+            const bgOffset = (now * 0.02) % 200;
+            ctx.fillStyle = 'rgba(34, 139, 34, 0.25)';
+            for (let i = -1; i < canvas.width / 100 + 1; i++) {
+                const tx = i * 150 - bgOffset;
+                ctx.beginPath();
+                ctx.moveTo(tx, canvas.height);
+                ctx.lineTo(tx + 30, canvas.height - 100);
+                ctx.lineTo(tx + 60, canvas.height);
+                ctx.fill();
+            }
+            
+            // 中景树
+            for (let tree of bgTrees) {
+                tree.x -= levelConfig.speed * 0.3;
+                if (tree.x + tree.width < 0) {
+                    tree.x = canvas.width + Math.random() * 100;
+                }
+                
+                ctx.fillStyle = tree.color;
+                ctx.beginPath();
+                ctx.moveTo(tree.x, canvas.height);
+                ctx.lineTo(tree.x + tree.width / 2, tree.y);
+                ctx.lineTo(tree.x + tree.width, canvas.height);
+                ctx.fill();
+            }
+            
+            // 草地
+            ctx.fillStyle = '#228B22';
+            ctx.fillRect(0, canvas.height - 35, canvas.width, 35);
+            ctx.fillStyle = '#32CD32';
+            ctx.fillRect(0, canvas.height - 25, canvas.width, 10);
+        }
+        
+        // ==================== 节奏系统 ====================
+        function updateRhythm(now) {
+            // 生成节奏点
+            if (now - lastBeatTime >= beatInterval) {
+                lastBeatTime = now;
+                rhythmBeats.push({
+                    x: canvas.width,
+                    y: canvas.height - 60,
+                    time: now,
+                    active: true
+                });
+                playBeatSound();
+            }
+            
+            // 更新节奏点
+            for (let beat of rhythmBeats) {
+                beat.x -= levelConfig.speed * 1.5;
+            }
+            rhythmBeats = rhythmBeats.filter(b => b.x > -50);
+        }
+        
+        function drawRhythmBeats() {
+            for (let beat of rhythmBeats) {
+                const alpha = 0.3 + 0.4 * Math.sin(performance.now() * 0.01);
+                ctx.fillStyle = `rgba(255, 105, 180, ${alpha})`;
+                ctx.beginPath();
+                ctx.arc(beat.x, beat.y, 10, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(beat.x, beat.y, 14, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+            
+            // 绘制判定线
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([8, 8]);
+            ctx.beginPath();
+            ctx.moveTo(peach.x, 0);
+            ctx.lineTo(peach.x, canvas.height);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+        
+        // ==================== 屁桃逻辑 ====================
+        function updatePeach() {
+            // 重力
+            peach.vy += 0.35;
+            peach.y += peach.vy;
+            
+            // 目标高度跟随（平滑）
+            const dy = peach.targetY - peach.y;
+            peach.vy += dy * 0.008;
+            
+            // 阻尼
+            peach.vy *= 0.96;
+            
+            // 边界
+            if (peach.y < 30) {
+                peach.y = 30;
+                peach.vy = Math.max(0, peach.vy);
+            }
+            if (peach.y > canvas.height - 80) {
+                peach.y = canvas.height - 80;
+                peach.vy = Math.min(0, peach.vy);
+            }
+            
+            // 角度
+            peach.angle = Math.min(Math.max(peach.vy * 0.04, -0.6), 0.6);
+            
+            // 冲刺恢复
+            if (peach.dashX > 0) {
+                peach.dashX *= 0.9;
+            }
+            
+            // 翅膀扇动
+            peach.flapPhase += 0.25;
+        }
+        
+        function drawPeach() {
+            const cx = peach.x + peach.dashX;
+            const cy = peach.y;
+            const wingFlap = Math.sin(peach.flapPhase) * 0.4;
+            
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(peach.angle);
+            
+            // 阴影
+            ctx.fillStyle = 'rgba(0,0,0,0.15)';
+            ctx.beginPath();
+            ctx.ellipse(5, 5, peach.width/2, peach.height/2, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 身体 - 立体渐变
+            const bodyGrad = ctx.createRadialGradient(-12, -22, 8, 0, 0, 45);
+            bodyGrad.addColorStop(0, '#F4E4BC');
+            bodyGrad.addColorStop(0.25, '#F4C586');
+            bodyGrad.addColorStop(0.5, '#F4A460');
+            bodyGrad.addColorStop(0.75, '#FA8072');
+            bodyGrad.addColorStop(0.9, '#E9967A');
+            bodyGrad.addColorStop(1, '#CD5C5C');
+            ctx.fillStyle = bodyGrad;
+            ctx.beginPath();
+            ctx.ellipse(0, 0, peach.width/2, peach.height/2, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 身体高光
+            ctx.fillStyle = 'rgba(255,255,255,0.25)';
+            ctx.beginPath();
+            ctx.ellipse(-10, -15, 12, 8, -0.3, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 沟壑
+            ctx.strokeStyle = 'rgba(139, 69, 19, 0.4)';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(0, -22);
+            ctx.quadraticCurveTo(4, 0, 0, 22);
+            ctx.stroke();
+            
+            // 眼睛
+            ctx.fillStyle = '#2d1b1b';
+            ctx.beginPath();
+            ctx.ellipse(-10, -6, 4, 6, 0, 0, Math.PI * 2);
+            ctx.ellipse(10, -6, 4, 6, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 眼神高光
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.arc(-11, -7, 2, 0, Math.PI * 2);
+            ctx.arc(9, -7, 2, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 腮红
+            const blushGrad = ctx.createRadialGradient(-15, 4, 0, -15, 4, 10);
+            blushGrad.addColorStop(0, 'rgba(255, 80, 80, 0.5)');
+            blushGrad.addColorStop(1, 'transparent');
+            ctx.fillStyle = blushGrad;
+            ctx.beginPath();
+            ctx.ellipse(-15, 4, 9, 6, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            const blushGrad2 = ctx.createRadialGradient(15, 4, 0, 15, 4, 10);
+            blushGrad2.addColorStop(0, 'rgba(255, 80, 80, 0.5)');
+            blushGrad2.addColorStop(1, 'transparent');
+            ctx.fillStyle = blushGrad2;
+            ctx.beginPath();
+            ctx.ellipse(15, 4, 9, 6, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 微笑
+            ctx.strokeStyle = '#2d1b1b';
+            ctx.lineWidth = 2.5;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.arc(0, 4, 12, 0.25, Math.PI - 0.25);
+            ctx.stroke();
+            
+            // 左翅膀
+            ctx.save();
+            ctx.translate(-28, -8);
+            ctx.rotate(-0.4 + wingFlap);
+            const wingGrad = ctx.createLinearGradient(0, 0, 55, 35);
+            wingGrad.addColorStop(0, '#FFB347');
+            wingGrad.addColorStop(0.4, '#FF8C00');
+            wingGrad.addColorStop(0.75, '#FF6347');
+            wingGrad.addColorStop(1, '#FF4500');
+            ctx.fillStyle = wingGrad;
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.quadraticCurveTo(25, -18, 55, 8);
+            ctx.quadraticCurveTo(35, 28, 0, 18);
+            ctx.fill();
+            // 翅膀纹理
+            ctx.strokeStyle = 'rgba(139, 0, 0, 0.25)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(8, 5);
+            ctx.quadraticCurveTo(25, -5, 45, 8);
+            ctx.moveTo(8, 12);
+            ctx.quadraticCurveTo(22, 8, 38, 18);
+            ctx.stroke();
+            ctx.restore();
+            
+            // 右翅膀
+            ctx.save();
+            ctx.translate(28, -8);
+            ctx.scale(-1, 1);
+            ctx.rotate(-0.4 + wingFlap);
+            ctx.fillStyle = wingGrad;
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.quadraticCurveTo(25, -18, 55, 8);
+            ctx.quadraticCurveTo(35, 28, 0, 18);
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(139, 0, 0, 0.25)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(8, 5);
+            ctx.quadraticCurveTo(25, -5, 45, 8);
+            ctx.moveTo(8, 12);
+            ctx.quadraticCurveTo(22, 8, 38, 18);
+            ctx.stroke();
+            ctx.restore();
+            
+            ctx.restore();
+        }
+        
+        // ==================== 间隙/树木 ====================
+        function updateGaps() {
+            for (let gap of gaps) {
+                gap.x -= levelConfig.speed;
+            }
+            
+            // 移除屏幕外的
+            while (gaps.length > 0 && gaps[0].x < -150) {
+                if (!gaps[0].passed && nextGapIndex > 0) {
+                    // 漏掉了
+                }
+                gaps.shift();
+                nextGapIndex = Math.max(0, nextGapIndex - 1);
+            }
+        }
+        
+        function drawGaps() {
+            for (let gap of gaps) {
+                const tx = gap.x;
+                const tw = gap.width;
+                
+                // 树干渐变
+                const trunkGrad = ctx.createLinearGradient(tx, 0, tx + tw, 0);
+                trunkGrad.addColorStop(0, '#654321');
+                trunkGrad.addColorStop(0.5, '#8B4513');
+                trunkGrad.addColorStop(1, '#5D3A1A');
+                ctx.fillStyle = trunkGrad;
+                
+                // 上树干
+                ctx.fillRect(tx, -10, tw, gap.y + 10);
+                // 下树干
+                ctx.fillRect(tx, gap.y + gap.height, tw, canvas.height - gap.y - gap.height + 10);
+                
+                // 树叶 - 上
+                const leafGrad = ctx.createLinearGradient(tx - 15, gap.y - 50, tx + tw + 15, gap.y);
+                leafGrad.addColorStop(0, '#228B22');
+                leafGrad.addColorStop(0.5, '#32CD32');
+                leafGrad.addColorStop(1, '#006400');
+                ctx.fillStyle = leafGrad;
+                ctx.beginPath();
+                ctx.moveTo(tx - 15, gap.y);
+                ctx.quadraticCurveTo(tx + tw/2, gap.y - 55, tx + tw + 15, gap.y);
+                ctx.fill();
+                
+                // 树叶 - 下
+                const leafGrad2 = ctx.createLinearGradient(tx - 15, gap.y + gap.height, tx + tw + 15, gap.y + gap.height + 50);
+                leafGrad2.addColorStop(0, '#228B22');
+                leafGrad2.addColorStop(0.5, '#32CD32');
+                leafGrad2.addColorStop(1, '#006400');
+                ctx.fillStyle = leafGrad2;
+                ctx.beginPath();
+                ctx.moveTo(tx - 15, gap.y + gap.height);
+                ctx.quadraticCurveTo(tx + tw/2, gap.y + gap.height + 55, tx + tw + 15, gap.y + gap.height);
+                ctx.fill();
+                
+                // 树干纹理
+                ctx.strokeStyle = 'rgba(60, 30, 10, 0.3)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(tx + tw * 0.3, 0);
+                ctx.lineTo(tx + tw * 0.3, gap.y);
+                ctx.moveTo(tx + tw * 0.7, gap.y + gap.height);
+                ctx.lineTo(tx + tw * 0.7, canvas.height);
+                ctx.stroke();
+            }
+        }
+        
+        // ==================== 碰撞检测 ====================
+        function checkCollision() {
+            const px = peach.x + peach.dashX;
+            const py = peach.y;
+            const pr = peach.width / 2 - 6;
+            
+            for (let gap of gaps) {
+                if (px + pr > gap.x && px - pr < gap.x + gap.width) {
+                    if (py - pr < gap.y || py + pr > gap.y + gap.height) {
+                        gameOver();
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+        
+        // ==================== 通过检测 ====================
+        function checkGapPass() {
+            for (let i = 0; i < gaps.length; i++) {
+                const gap = gaps[i];
+                if (!gap.passed && peach.x > gap.x + gap.width) {
+                    gap.passed = true;
+                    gapPassed++;
+                    nextGapIndex = i + 1;
+                    score += 10 + combo * 2;
+                    combo++;
+                    document.getElementById('score').textContent = score;
+                    
+                    const comboEl = document.getElementById('comboDisplay');
+                    document.getElementById('combo').textContent = combo;
+                    comboEl.style.display = 'block';
+                    comboEl.style.animation = 'none';
+                    comboEl.offsetHeight;
+                    comboEl.style.animation = 'comboPulse 0.5s ease-out';
+                    
+                    playChildLaugh();
+                    showSoundPopup('嘻~', pxToScreen(gap.x + gap.width/2, gap.y + gap.height/2));
+                    createHeartParticles(gap.x + gap.width/2, gap.y + gap.height/2);
+                    
+                    // 完美判定特效
+                    if (combo > 0 && combo % 5 === 0) {
+                        showPerfectText(pxToScreen(peach.x, peach.y - 60));
+                    }
+                }
+            }
+        }
+        
+        // ==================== 输入控制 ====================
+        function handleInput(e) {
+            if (!gameRunning || gamePaused) return;
+            if (e && e.target && e.target.tagName === 'BUTTON') return;
+            
+            initAudio();
+            
+            // 节奏判定
+            const now = performance.now();
+            let perfect = false;
+            
+            // 找到最近的节奏点
+            for (let beat of rhythmBeats) {
+                const dist = Math.abs(beat.x - peach.x);
+                if (dist < levelConfig.rhythmTolerance && beat.active) {
+                    beat.active = false;
+                    perfect = true;
+                    peach.dashX = 25;
+                    break;
+                }
+            }
+            
+            // 计算下一个间隙的目标高度
+            const nextGap = gaps[nextGapIndex];
+            if (nextGap) {
+                peach.targetY = nextGap.y + nextGap.height / 2;
+            }
+            
+            // 向上冲
+            peach.vy = -7;
+            
+            // 节奏完美奖励
+            if (perfect) {
+                score += 5;
+                document.getElementById('score').textContent = score;
+                createSparkles(peach.x, peach.y);
+            }
+            
+            // 创建翅膀扇动粒子
+            createWindParticles(peach.x - 20, peach.y);
+        }
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' || e.key === ' ' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                handleInput();
+            }
+        });
+        
+        document.addEventListener('mousedown', (e) => handleInput(e));
+        document.addEventListener('touchstart', (e) => {
+            if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT') return;
+            e.preventDefault();
+            handleInput(e);
+        }, { passive: false });
+        
+        // ==================== 粒子系统 ====================
+        function createSparkles(x, y) {
+            for (let i = 0; i < 8; i++) {
+                particles.push({
+                    x: x, y: y,
+                    vx: (Math.random() - 0.5) * 6,
+                    vy: (Math.random() - 0.5) * 6,
+                    life: 1,
+                    size: 3 + Math.random() * 5,
+                    color: `hsl(${40 + Math.random() * 30}, 100%, 60%)`,
+                    type: 'sparkle'
+                });
+            }
+        }
+        
+        function createWindParticles(x, y) {
+            for (let i = 0; i < 5; i++) {
+                particles.push({
+                    x: x, y: y + (Math.random() - 0.5) * 30,
+                    vx: -3 - Math.random() * 4,
+                    vy: (Math.random() - 0.5) * 2,
+                    life: 0.8,
+                    size: 2 + Math.random() * 4,
+                    color: 'rgba(255,255,255,0.6)',
+                    type: 'wind'
+                });
+            }
+        }
+        
+        function createHeartParticles(x, y) {
+            const el = document.getElementById('gameEffects');
+            for (let i = 0; i < 5; i++) {
+                const heart = document.createElement('div');
+                heart.className = 'heart-particle';
+                heart.textContent = ['💖', '💕', '💗', '💝', '🍑'][Math.floor(Math.random() * 5)];
+                heart.style.left = x + 'px';
+                heart.style.top = y + 'px';
+                heart.style.animationDelay = (Math.random() * 0.3) + 's';
+                el.appendChild(heart);
+                setTimeout(() => heart.remove(), 2500);
+            }
+        }
+        
+        function updateParticles() {
+            for (let p of particles) {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life -= 0.02;
+                if (p.type === 'sparkle') p.vy += 0.1;
+            }
+            particles = particles.filter(p => p.life > 0);
+        }
+        
+        function drawParticles() {
+            for (let p of particles) {
+                ctx.globalAlpha = p.life;
+                if (p.type === 'wind') {
+                    ctx.fillStyle = p.color;
+                    ctx.beginPath();
+                    ctx.ellipse(p.x, p.y, p.size * 2, p.size, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                } else {
+                    ctx.fillStyle = p.color;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.globalAlpha = 1;
+            }
+        }
+        
+        // ==================== UI 特效 ====================
+        function pxToScreen(x, y) {
+            const rect = canvas.getBoundingClientRect();
+            return { x: rect.left + x, y: rect.top + y };
+        }
+        
+        function showSoundPopup(text, pos) {
+            const el = document.createElement('div');
+            el.className = 'sound-popup';
+            el.textContent = text;
+            el.style.left = pos.x + 'px';
+            el.style.top = pos.y + 'px';
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 800);
+        }
+        
+        function showPerfectText(pos) {
+            const el = document.createElement('div');
+            el.className = 'perfect-text';
+            el.textContent = '完美!';
+            el.style.left = pos.x + 'px';
+            el.style.top = pos.y + 'px';
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 1000);
+        }
+        
+        // ==================== 游戏结束 / 通关 ====================
+        function gameOver() {
+            gameRunning = false;
+            cancelAnimationFrame(animationId);
+            stopBGM();
+            combo = 0;
+            
+            // 震动效果
+            canvas.style.transform = 'translate(5px, 5px)';
+            setTimeout(() => canvas.style.transform = 'translate(-5px, -5px)', 50);
+            setTimeout(() => canvas.style.transform = 'translate(5px, -5px)', 100);
+            setTimeout(() => canvas.style.transform = 'translate(0, 0)', 150);
+            
+            setTimeout(() => {
+                alert(`游戏结束! 得分: ${score}\n再试一次吧~`);
+                showLevelSelect();
+            }, 300);
+        }
+        
+        function levelComplete() {
+            gameRunning = false;
+            cancelAnimationFrame(animationId);
+            stopBGM();
+            
+            if (currentLevel === unlockedLevel && unlockedLevel < 100) {
+                unlockedLevel++;
+                localStorage.setItem('peachUnlocked', unlockedLevel);
+            }
+            
+            // 保存分数
+            saveScore(currentLevel, score);
+            
+            hideAllScreens();
+            document.getElementById('winScreen').classList.add('active');
+            document.getElementById('winScore').textContent = score;
+            
+            setTimeout(() => {
+                playHangSound();
+                createJuiceAnimation();
+                createWinStars();
+            }, 300);
+        }
+        
+        function createJuiceAnimation() {
+            const container = document.getElementById('juiceAnim');
+            container.innerHTML = '';
+            
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const drop = document.createElement('div');
+                    drop.style.position = 'absolute';
+                    drop.style.width = (20 + Math.random() * 25) + 'px';
+                    drop.style.height = drop.style.width;
+                    drop.style.background = `radial-gradient(circle at 30% 30%, #FFB6C1, #FF69B4, #FF1493)`;
+                    drop.style.borderRadius = '50%';
+                    drop.style.left = Math.random() * 100 + '%';
+                    drop.style.top = '-50px';
+                    drop.style.animation = `juiceFall ${1.5 + Math.random()}s ease-in forwards`;
+                    drop.style.boxShadow = '0 5px 15px rgba(255,20,147,0.4)';
+                    container.appendChild(drop);
+                }, i * 60);
+            }
+            
+        }
+        
+        function createWinStars() {
+            const container = document.getElementById('winEffects');
+            container.innerHTML = '';
+            for (let i = 0; i < 30; i++) {
+                setTimeout(() => {
+                    const star = document.createElement('div');
+                    star.style.position = 'absolute';
+                    star.textContent = ['⭐', '✨', '🍑', '💖'][Math.floor(Math.random() * 4)];
+                    star.style.fontSize = (24 + Math.random() * 30) + 'px';
+                    star.style.left = Math.random() * 100 + '%';
+                    star.style.top = Math.random() * 100 + '%';
+                    star.style.animation = `starPop ${0.8 + Math.random() * 0.5}s ease-out forwards`;
+                    star.style.pointerEvents = 'none';
+                    container.appendChild(star);
+                }, i * 40);
+            }
+        }
+        
+        function nextLevel() {
+            if (currentLevel < 100) {
+                startGame(currentLevel + 1);
+            } else {
+                alert('🎉 太厉害了! 你已经通关所有100关! 🎉');
+                showLevelSelect();
+            }
+        }
+        
+        function backToLevels() {
+            stopGame();
+            showLevelSelect();
+        }
+        
+        function togglePause() {
+            gamePaused = !gamePaused;
+            if (!gamePaused) {
+                lastBeatTime = performance.now();
+                startBGM();
+            } else {
+                stopBGM();
+            }
+        }
+        
+        function stopGame() {
+            gameRunning = false;
+            gamePaused = false;
+            cancelAnimationFrame(animationId);
+            stopBGM();
+            combo = 0;
+        }
+        
+        window.addEventListener('resize', () => {
+            if (canvas) {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+        });
+        
+        window.addEventListener('orientationchange', () => {
+            setTimeout(() => {
+                if (canvas) {
+                    canvas.width = window.innerWidth;
+                    canvas.height = window.innerHeight;
+                }
+            }, 300);
+        });
+        
+        // 防止移动端长按弹出菜单
+        document.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+        });
+        
+        // 防止 iOS 双击缩放
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', (e) => {
+            const now = Date.now();
+            if (now - lastTouchEnd <= 300) {
+                e.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+        
+        // ==================== 封面/选关特效 ====================
+        function startCoverEffects() {
+            const container = document.getElementById('coverEffects');
+            container.innerHTML = '';
+            
+            const interval1 = setInterval(() => {
+                if (!document.getElementById('coverScreen').classList.contains('active')) {
+                    clearInterval(interval1);
+                    return;
+                }
+                const heart = document.createElement('div');
+                heart.textContent = ['💖', '💕', '🍑', '✨'][Math.floor(Math.random() * 4)];
+                heart.style.position = 'absolute';
+                heart.style.fontSize = (20 + Math.random() * 20) + 'px';
+                heart.style.left = Math.random() * 100 + '%';
+                heart.style.top = Math.random() * 100 + '%';
+                heart.style.animation = 'heartFloatUp 3s ease-out forwards';
+                heart.style.opacity = '0.7';
+                container.appendChild(heart);
+                setTimeout(() => heart.remove(), 3000);
+            }, 800);
+            
+            const interval2 = setInterval(() => {
+                if (!document.getElementById('coverScreen').classList.contains('active')) {
+                    clearInterval(interval2);
+                    return;
+                }
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle-particle';
+                sparkle.style.left = Math.random() * 100 + '%';
+                sparkle.style.top = Math.random() * 100 + '%';
+                container.appendChild(sparkle);
+                setTimeout(() => sparkle.remove(), 1500);
+            }, 600);
+        }
+        
+        function startLevelEffects() {
+            const container = document.getElementById('levelEffects');
+            container.innerHTML = '';
+            
+            const interval = setInterval(() => {
+                if (!document.getElementById('levelScreen').classList.contains('active')) {
+                    clearInterval(interval);
+                    return;
+                }
+                const leaf = document.createElement('div');
+                leaf.textContent = '🍃';
+                leaf.style.position = 'absolute';
+                leaf.style.fontSize = (18 + Math.random() * 14) + 'px';
+                leaf.style.left = '-30px';
+                leaf.style.top = Math.random() * 100 + '%';
+                leaf.style.animation = `drift1 ${8 + Math.random() * 6}s linear forwards`;
+                leaf.style.opacity = '0.6';
+                container.appendChild(leaf);
+                setTimeout(() => leaf.remove(), 15000);
+            }, 1200);
+        }
+        
+        // ==================== 启动 ====================
+        initCoverForest();
+        startCoverEffects();
+        
+        // 回车登录
+        document.getElementById('playerNameInput').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') doLogin();
+        });
+        
+        // 如果已有名字，预填到输入框
+        if (playerName) {
+            document.getElementById('playerNameInput').value = playerName;
+        }
+    </script>
+</body>
+</html>
